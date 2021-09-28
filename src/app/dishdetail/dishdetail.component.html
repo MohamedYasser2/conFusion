@@ -12,7 +12,7 @@
                 <h3 *ngIf="dish">{{dish.name | uppercase}}</h3>
               </mat-card-title>
             </mat-card-header>
-            <img mat-card-image src={{dish.image}} alt={{dish.name}}>
+            <img mat-card-image src="{{ baseURL + dish.image }}" alt={{dish.name}}>
             <mat-card-content>
               <p>{{dish.description}}
               </p>
@@ -28,7 +28,7 @@
           </mat-card>
         </div>
 
-      <div fxFlex="40" *ngIf="dish">
+      <div fxFlex="40" *ngIf="dish" >
             <h1>Comments</h1>
         <mat-list >
           <mat-list-item *ngFor="let i of dish.comments" >
@@ -38,6 +38,39 @@
               <mat-divider></mat-divider>
           </mat-list-item>
         </mat-list>
+        <div  *ngIf="currentList.author || currentList.comment || currentList.rating" >
+          <mat-list  >
+            <mat-list-item >
+                <p matLine *ngIf="currentList.comment">{{currentList.comment}}</p>
+                <p matLine *ngIf="currentList.rating">{{currentList.rating}} Stars</p>
+                <p matLine *ngIf="currentList.author">-- {{currentList.author}} </p>
+            </mat-list-item>
+          </mat-list>
+        </div>
+      
+        <mat-list>
+          <div fxFlex fxFlexOffset="20px" class="form-size">
+          <form novalidate [formGroup]="commentFormGroup" #fform="ngForm" (ngSubmit)="onSubmit()">
+            <p>
+              <mat-form-field class="half-width">
+                <input matInput formControlName="author" (keyup)="handleAuthor($event)" placeholder="Name" type="text" required>
+                <mat-error *ngIf="formErrors.author">{{formErrors.author}}</mat-error>
+              </mat-form-field>
+            </p>
+            <p>
+              <mat-slider formControlName="rating" (change)="updateSetting($event)" thumbLabel tickInterval="1" min="1" max="5" step="1" value="5"></mat-slider>
+            </p>
+            <p>
+              <mat-form-field class="half-width">
+                <textarea matInput formControlName="comment" (keyup)="handleComment($event)" placeholder="Your Comment" rows=8 required></textarea>
+                <mat-error *ngIf="formErrors.comment">{{formErrors.comment}}</mat-error>
+              </mat-form-field>
+            </p>
+            <button type="submit" mat-button class="background-primary text-floral-white" [disabled]="commentFormGroup.invalid">Submit</button>
+          </form>
+        </div>
+        </mat-list>
+        
       </div>
       <div [hidden]="dish">
         <mat-spinner></mat-spinner><h4>Loading . . . Please Wait</h4>
