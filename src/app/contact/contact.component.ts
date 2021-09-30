@@ -2,6 +2,11 @@ import { Component, OnInit,ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Feedback, ContactType } from '../shared/feedback';
 import { flyInOut } from '../animations/app.animations';
+import { FeedbackService } from '../services/feedback.service';
+import { delay, switchMap, timeout } from 'rxjs/operators';
+import { Params } from '@angular/router';
+import { expand } from '../animations/app.animations';
+
 @Component({
   selector: 'app-contact',
   templateUrl: './contact.component.html',
@@ -11,16 +16,15 @@ import { flyInOut } from '../animations/app.animations';
     'style': 'display: block;'
     },
     animations: [
-      flyInOut()
+      flyInOut(),
+      expand()
     ]
 })
 export class ContactComponent implements OnInit {
-
   feedbackForm: FormGroup;
   feedback: Feedback;
   contactType = ContactType;
-
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder , private feedbackService : FeedbackService) {
     this.createForm();
   }
 
@@ -71,10 +75,10 @@ export class ContactComponent implements OnInit {
     this.onValueChanged(); // (re)set validation messages now
 
   }
-
-  onSubmit() {
+   onSubmit() {
     this.feedback = this.feedbackForm.value;
-    console.log(this.feedback);
+    this.feedbackService.submitFeedback(this.feedback).subscribe(feedback => {
+    this.feedback = feedback;});
     this.feedbackForm.reset({
       firstname: '',
       lastname: '',
@@ -85,8 +89,27 @@ export class ContactComponent implements OnInit {
       message: ''
     });
     this.feedbackFormDirective.resetForm();
-  }
-  onValueChanged(data?: any) {
+    this.showMySubmission();
+    }
+      showMySubmission() {
+      var mainFrameOne = document.getElementById("mainFrameOne"); 
+      var mainFrameTwo = document.getElementById("mainFrameTwo");
+      var mainFrameThree = document.getElementById("mainFrameThree");
+      mainFrameOne.style.display = (
+          mainFrameOne.style.display == "none" ? "block" : "none"); 
+      mainFrameTwo.style.display = (
+          mainFrameTwo.style.display == "none" ? "block" : "none"); 
+      setTimeout(function(){mainFrameThree.style.display = (
+        mainFrameThree.style.display == "none" ? "block" : "none"); 
+    mainFrameTwo.style.display = (
+        mainFrameTwo.style.display == "none" ? "block" : "none"); },2000);
+        setTimeout(function(){mainFrameThree.style.display = (
+          mainFrameThree.style.display == "none" ? "block" : "none"); 
+      mainFrameOne.style.display = (
+          mainFrameOne.style.display == "none" ? "block" : "none"); },7000);
+   }
+   
+   onValueChanged(data?: any) {
     if (!this.feedbackForm) { return; }
     const form = this.feedbackForm;
     for (const field in this.formErrors) {
